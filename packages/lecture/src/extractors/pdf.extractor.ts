@@ -1,14 +1,12 @@
 import sharp from 'sharp';
 import { extractImages, extractText, getDocumentProxy } from 'unpdf';
 import { defineTextExtractor } from '../extractors.models';
-import { extractTextFromImage } from './img.extractor';
+import { imageExtractorDefinition } from './img.extractor';
 
 export const pdfExtractorDefinition = defineTextExtractor({
   name: 'pdf',
   mimeTypes: ['application/pdf'],
   extract: async ({ arrayBuffer, config }) => {
-    const { languages } = config.tesseract;
-
     const pdf = await getDocumentProxy(arrayBuffer);
 
     const { text, totalPages } = await extractText(pdf, { mergePages: true });
@@ -29,7 +27,11 @@ export const pdfExtractorDefinition = defineTextExtractor({
           .png()
           .toBuffer();
 
-        const imageText = await extractTextFromImage(imageBuffer, { languages });
+        const { content: imageText } = await imageExtractorDefinition.extract({
+          arrayBuffer: imageBuffer,
+          mimeType: 'image/png',
+          config,
+        });
         imageTexts.push(imageText);
       }
     }
