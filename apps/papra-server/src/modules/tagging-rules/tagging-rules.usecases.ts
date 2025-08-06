@@ -72,13 +72,17 @@ async function getAiSuggestedTags({
 
   try {
     const genAI = new GoogleGenAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
     const prompt = `You are an expert document archivist. Based on the following document content, suggest a maximum of 5 relevant tags. Return the tags as a JSON array of strings. For example: ["invoice", "finance", "2024"]. Do not return anything else but the JSON array. The content is: "${content}"`;
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text().trim().replace(/```json|```/g, '');
+    const result = await genAI.models.generateContent({
+      model: 'gemini-2.0-flash',
+      contents: [{
+        role: 'user',
+        parts: [{ text: prompt }],
+      }],
+    });
+    const text = result.response.text().trim().replace(/```json|```/g, '');
     const json = JSON.parse(text);
 
     const parsed = AITagsSchema.safeParse(json);
