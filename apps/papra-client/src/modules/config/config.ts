@@ -38,7 +38,7 @@ export const buildTimeConfig = {
     isEnabled: asBoolean(import.meta.env.VITE_INTAKE_EMAILS_IS_ENABLED, false),
   },
   isSubscriptionsEnabled: asBoolean(import.meta.env.VITE_IS_SUBSCRIPTIONS_ENABLED, false),
-  isAiTaggingEnabled: asBoolean(import.meta.env.VITE_IS_AI_TAGGING_ENABLED, false),
+  isAiTaggingEnabled: asBoolean(import.meta.env.VITE_IS_AI_TAGGING_ENABLED, true),
 } as const;
 
 export type Config = typeof buildTimeConfig;
