@@ -1,6 +1,7 @@
 import type { PolymorphicProps } from '@kobalte/core/polymorphic';
 import type {
   SwitchControlProps,
+  SwitchRootProps,
   SwitchThumbProps,
 } from '@kobalte/core/switch';
 import type { ParentProps, ValidComponent, VoidProps } from 'solid-js';
@@ -9,7 +10,6 @@ import { splitProps } from 'solid-js';
 import { cn } from '@/modules/shared/style/cn';
 
 export const SwitchLabel = SwitchPrimitive.Label;
-export const Switch = SwitchPrimitive;
 export const SwitchErrorMessage = SwitchPrimitive.ErrorMessage;
 export const SwitchDescription = SwitchPrimitive.Description;
 
@@ -52,3 +52,13 @@ export function SwitchThumb<T extends ValidComponent = 'div'>(props: Polymorphic
     />
   );
 }
+
+export const Switch = (props: SwitchRootProps) => {
+  return (
+    <SwitchPrimitive {...props}>
+      <SwitchControl>
+        <SwitchThumb />
+      </SwitchControl>
+    </SwitchPrimitive>
+  );
+};
