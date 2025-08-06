@@ -94,21 +94,22 @@ function setupUpdateOrganizationRoute({ app, db }: RouteDefinitionContext) {
     '/api/organizations/:organizationId',
     requireAuthentication(),
     validateJsonBody(z.object({
-      name: z.string().min(3).max(50),
+      name: z.string().min(3).max(50).optional(),
+      aiTaggingEnabled: z.boolean().optional(),
     })),
     validateParams(z.object({
       organizationId: organizationIdSchema,
     })),
     async (context) => {
       const { userId } = getUser({ context });
-      const { name } = context.req.valid('json');
+      const { name, aiTaggingEnabled } = context.req.valid('json');
       const { organizationId } = context.req.valid('param');
 
       const organizationsRepository = createOrganizationsRepository({ db });
 
       await ensureUserIsInOrganization({ userId, organizationId, organizationsRepository });
 
-      const { organization } = await organizationsRepository.updateOrganization({ organizationId, organization: { name } });
+      const { organization } = await organizationsRepository.updateOrganization({ organizationId, organization: { name, aiTaggingEnabled } });
 
       return context.json({
         organization,

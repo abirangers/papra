@@ -119,7 +119,8 @@ export async function createDocument({
     documentActivityRepository,
   });
 
-  await applyTaggingRules({ document, taggingRulesRepository, tagsRepository });
+  // Tagging rules are applied after content extraction
+  // await applyTaggingRules({ document, taggingRulesRepository, tagsRepository, config });
 
   deferTriggerWebhooks({
     webhookRepository,
@@ -403,6 +404,8 @@ export async function deleteAllTrashDocuments({
   );
 }
 
+import { createOrganizationsRepository } from '../organizations/organizations.repository';
+
 export async function extractAndSaveDocumentFileContent({
   documentId,
   organizationId,
@@ -410,6 +413,9 @@ export async function extractAndSaveDocumentFileContent({
   documentsStorageService,
   ocrLanguages,
   config,
+  tagsRepository,
+  taggingRulesRepository,
+  organizationsRepository,
 }: {
   documentId: string;
   ocrLanguages?: string[];
@@ -417,6 +423,9 @@ export async function extractAndSaveDocumentFileContent({
   documentsRepository: DocumentsRepository;
   documentsStorageService: DocumentStorageService;
   config: Config;
+  tagsRepository: TagsRepository;
+  taggingRulesRepository: TaggingRulesRepository;
+  organizationsRepository: OrganizationsRepository;
 }) {
   const { document } = await documentsRepository.getDocumentById({ documentId, organizationId });
 
@@ -425,10 +434,12 @@ export async function extractAndSaveDocumentFileContent({
   }
 
   const { fileStream } = await documentsStorageService.getFileStream({ storageKey: document.originalStorageKey });
-
   const { file } = await collectStreamToFile({ fileStream, fileName: document.name, mimeType: document.mimeType });
-
   const { text } = await extractDocumentText({ file, ocrLanguages, config });
 
-  await documentsRepository.updateDocument({ documentId, organizationId, content: text });
+  const { document: updatedDocument } = await documentsRepository.updateDocument({ documentId, organizationId, content: text });
+
+  if (updatedDocument) {
+    await applyTaggingRules({ document: updatedDocument, taggingRulesRepository, tagsRepository, config, organizationsRepository });
+  }
 }

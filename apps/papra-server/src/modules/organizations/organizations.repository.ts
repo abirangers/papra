@@ -91,7 +91,7 @@ async function isUserInOrganization({ userId, organizationId, db }: { userId: st
   };
 }
 
-async function updateOrganization({ organizationId, organization: organizationToUpdate, db }: { organizationId: string; organization: { name?: string; customerId?: string }; db: Database }) {
+async function updateOrganization({ organizationId, organization: organizationToUpdate, db }: { organizationId: string; organization: { name?: string; customerId?: string; aiTaggingEnabled?: boolean }; db: Database }) {
   const [organization] = await db
     .update(organizationsTable)
     .set(omitUndefined(organizationToUpdate))

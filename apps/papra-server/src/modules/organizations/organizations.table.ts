@@ -11,6 +11,7 @@ export const organizationsTable = sqliteTable('organizations', {
 
   name: text('name').notNull(),
   customerId: text('customer_id'),
+  aiTaggingEnabled: integer('ai_tagging_enabled', { mode: 'boolean' }).notNull().default(false),
 });
 
 export const organizationMembersTable = sqliteTable('organization_members', {

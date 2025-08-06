@@ -18,6 +18,7 @@ import { TextField, TextFieldLabel, TextFieldRoot } from '@/modules/ui/component
 import { useDeleteOrganization, useUpdateOrganization } from '../organizations.composables';
 import { organizationNameSchema } from '../organizations.schemas';
 import { fetchOrganization } from '../organizations.services';
+import { AiTaggingSettingsCard } from '../components/ai-tagging-settings-card.component';
 
 const DeleteOrganizationCard: Component<{ organization: Organization }> = (props) => {
   const { deleteOrganization } = useDeleteOrganization();
@@ -189,6 +190,7 @@ export const OrganizationsSettingsPage: Component = () => {
 
               <div class="mt-6 flex flex-col gap-6">
                 <UpdateOrganizationNameCard organization={getOrganization()} />
+                <AiTaggingSettingsCard organization={getOrganization()} />
                 <SubscriptionCard organization={getOrganization()} />
                 <DeleteOrganizationCard organization={getOrganization()} />
               </div>
