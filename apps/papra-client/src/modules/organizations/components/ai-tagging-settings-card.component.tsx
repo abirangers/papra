@@ -3,7 +3,7 @@ import type { Organization } from '../organizations.types';
 import { useI18n } from '@/modules/i18n/i18n.provider';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/modules/ui/components/card';
 import { createToast } from '@/modules/ui/components/sonner';
-import { Switch } from '@/modules/ui/components/switch';
+import { Switch, SwitchControl, SwitchThumb } from '@/modules/ui/components/switch';
 import { useUpdateOrganization } from '../organizations.composables';
 
 export const AiTaggingSettingsCard: Component<{ organization: Organization }> = (props) => {
@@ -31,7 +31,11 @@ export const AiTaggingSettingsCard: Component<{ organization: Organization }> = 
         <Switch
           checked={props.organization.aiTaggingEnabled}
           onCheckedChange={handleToggle}
-        />
+        >
+          <SwitchControl>
+            <SwitchThumb />
+          </SwitchControl>
+        </Switch>
       </CardContent>
     </Card>
   );
