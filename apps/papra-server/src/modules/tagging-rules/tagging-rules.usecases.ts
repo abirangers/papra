@@ -7,9 +7,8 @@ import type { TaggingRuleOperatorValidatorRegistry } from './conditions/tagging-
 import type { TaggingRulesRepository } from './tagging-rules.repository';
 import type { TaggingRuleField, TaggingRuleOperator } from './tagging-rules.types';
 import { safely, safelySync } from '@corentinth/chisels';
-import { GoogleGenAI } from '@google/genai';
-
 import { uniq } from 'lodash-es';
+import { Ollama } from 'ollama-node';
 import { z } from 'zod';
 import { createLogger } from '../shared/logger/logger';
 import { createTaggingRuleOperatorValidatorRegistry } from './conditions/tagging-rule-conditions.registry';
@@ -59,30 +58,25 @@ const AITagsSchema = z.array(z.string());
 
 async function getAiSuggestedTags({
   content,
-  apiKey,
+  config,
   logger,
 }: {
-  content: string;
-  apiKey: string;
+  content:string;
+  config: Config['ollama'];
   logger: Logger;
 }): Promise<string[]> {
-  if (!apiKey) {
+  const { baseUrl, model } = config;
+  if (!baseUrl || !model) {
     return [];
   }
 
   try {
-    const genAI = new GoogleGenAI(apiKey);
+    const ollama = new Ollama(baseUrl);
 
     const prompt = `You are an expert document archivist. Based on the following document content, suggest a maximum of 5 relevant tags. Return the tags as a JSON array of strings. For example: ["invoice", "finance", "2024"]. Do not return anything else but the JSON array. The content is: "${content}"`;
 
-    const response = await genAI.models.generateContent({
-      model: 'gemini-2.0-flash',
-      contents: [{
-        role: 'user',
-        parts: [{ text: prompt }],
-      }],
-    });
-    const text = response.text.trim().replace(/```json|```/g, '');
+    const response = await ollama.generate(model, prompt);
+    const text = response.output.trim().replace(/```json|```/g, '');
     const json = JSON.parse(text);
 
     const parsed = AITagsSchema.safeParse(json);
@@ -134,7 +128,7 @@ export async function applyTaggingRules({
   const { organization } = await organizationsRepository.getOrganizationById({ organizationId: document.organizationId });
   let aiSuggestedTagIds: string[] = [];
   if (organization?.aiTaggingEnabled && document.content) {
-    const suggestedTagNames = await getAiSuggestedTags({ content: document.content, apiKey: config.gemini.apiKey, logger });
+    const suggestedTagNames = await getAiSuggestedTags({ content: document.content, config: config.ollama, logger });
     if (suggestedTagNames.length > 0) {
       const { tags: existingOrgTags } = await tagsRepository.getOrganizationTags({ organizationId: document.organizationId });
       const lowercasedExistingTags = new Map(existingOrgTags.map(t => [t.name.toLowerCase(), t]));

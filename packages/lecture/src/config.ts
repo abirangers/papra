@@ -16,8 +16,10 @@ export function parseConfig({ rawConfig = {} }: { rawConfig?: PartialExtractorCo
       tesseract: {
         languages: languages.length > 0 ? languages : ['eng'],
       },
-      gemini: {
-        apiKey: rawConfig.gemini?.apiKey,
+      ollama: {
+        baseUrl: rawConfig.ollama?.baseUrl ?? 'http://localhost:11434',
+        model: rawConfig.ollama?.model ?? 'gemma3:4b',
+        embeddingModel: rawConfig.ollama?.embeddingModel ?? 'mxbai-embed-large',
       },
     },
   };

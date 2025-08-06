@@ -29,7 +29,7 @@ export async function extractDocumentText({
 }) {
   const { textContent, error, extractorName } = await extractTextFromFile({
     file,
-    config: { tesseract: { languages: ocrLanguages }, gemini: { apiKey: config.gemini.apiKey } },
+    config: { tesseract: { languages: ocrLanguages }, ollama: config.ollama },
   });
 
   if (error) {

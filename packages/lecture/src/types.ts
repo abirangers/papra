@@ -4,8 +4,10 @@ export type ExtractorConfig = {
   tesseract: {
     languages: string[];
   };
-  gemini: {
-    apiKey?: string;
+  ollama: {
+    baseUrl: string;
+    model: string;
+    embeddingModel: string;
   };
 };
 

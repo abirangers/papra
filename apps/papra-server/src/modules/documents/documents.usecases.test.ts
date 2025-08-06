@@ -2,7 +2,10 @@ import { describe, expect, test } from 'vitest';
 import { createInMemoryDatabase } from '../app/database/database.test-utils';
 import { overrideConfig } from '../config/config.test-utils';
 import { ORGANIZATION_ROLES } from '../organizations/organizations.constants';
+import { createOrganizationsRepository } from '../organizations/organizations.repository';
 import { nextTick } from '../shared/async/defer.test-utils';
+import { createTaggingRulesRepository } from '../tagging-rules/tagging-rules.repository';
+import { createTagsRepository } from '../tags/tags.repository';
 import { collectReadableStreamToString } from '../shared/streams/readable-stream';
 import { documentsTagsTable } from '../tags/tags.table';
 import { createInMemoryTaskServices } from '../tasks/tasks.test-utils';
@@ -202,6 +205,8 @@ describe('documents usecases', () => {
         organizationId: 'organization-1',
       });
 
+      await nextTick();
+
       expect(documentRestored).to.deep.include({
         id: 'document-1',
         organizationId: 'organization-1',
@@ -345,6 +350,9 @@ describe('documents usecases', () => {
 
       const documentsRepository = createDocumentsRepository({ db });
       const documentsStorageService = await createDocumentStorageService({ config });
+      const tagsRepository = createTagsRepository({ db });
+      const taggingRulesRepository = createTaggingRulesRepository({ db });
+      const organizationsRepository = createOrganizationsRepository({ db });
 
       await db.insert(documentsTable).values({
         id: 'document-1',
@@ -366,6 +374,10 @@ describe('documents usecases', () => {
         organizationId: 'organization-1',
         documentsRepository,
         documentsStorageService,
+        config,
+        tagsRepository,
+        taggingRulesRepository,
+        organizationsRepository,
       });
 
       const documentRecords = await db.select().from(documentsTable);

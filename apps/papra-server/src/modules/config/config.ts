@@ -83,11 +83,24 @@ export const configDefinition = {
     },
   },
 
-  gemini: {
-    apiKey: {
-      doc: 'The API key for Google Gemini.',
-      schema: z.string().min(1),
-      env: 'GEMINI_API_KEY',
+  ollama: {
+    baseUrl: {
+      doc: 'The base URL of the Ollama server.',
+      schema: z.string().url(),
+      default: 'http://localhost:11434',
+      env: 'OLLAMA_BASE_URL',
+    },
+    model: {
+      doc: 'The Ollama model to use for generation.',
+      schema: z.string(),
+      default: 'gemma3:4b',
+      env: 'OLLAMA_MODEL',
+    },
+    embeddingModel: {
+      doc: 'The Ollama model to use for embeddings.',
+      schema: z.string(),
+      default: 'mxbai-embed-large',
+      env: 'OLLAMA_EMBEDDING_MODEL',
     },
   },
 
