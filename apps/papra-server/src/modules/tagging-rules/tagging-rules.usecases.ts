@@ -82,7 +82,7 @@ async function getAiSuggestedTags({
         parts: [{ text: prompt }],
       }],
     });
-    const text = response.text().trim().replace(/```json|```/g, '');
+    const text = response.text.trim().replace(/```json|```/g, '');
     const json = JSON.parse(text);
 
     const parsed = AITagsSchema.safeParse(json);
