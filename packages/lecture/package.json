@@ -54,7 +54,6 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "catalog:",
-    "@types/mammoth": "^1.4.6",
     "@types/node": "catalog:",
     "@vitest/coverage-v8": "catalog:",
     "eslint": "catalog:",
