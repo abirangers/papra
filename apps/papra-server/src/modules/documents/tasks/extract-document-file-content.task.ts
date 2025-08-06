@@ -23,6 +23,7 @@ export async function registerExtractDocumentFileContentTask({ taskServices, db,
         ocrLanguages,
         documentsRepository,
         documentsStorageService,
+        config,
       });
     },
   });

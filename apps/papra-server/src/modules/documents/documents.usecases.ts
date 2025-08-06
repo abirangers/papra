@@ -409,12 +409,14 @@ export async function extractAndSaveDocumentFileContent({
   documentsRepository,
   documentsStorageService,
   ocrLanguages,
+  config,
 }: {
   documentId: string;
   ocrLanguages?: string[];
   organizationId: string;
   documentsRepository: DocumentsRepository;
   documentsStorageService: DocumentStorageService;
+  config: Config;
 }) {
   const { document } = await documentsRepository.getDocumentById({ documentId, organizationId });
 
@@ -426,7 +428,7 @@ export async function extractAndSaveDocumentFileContent({
 
   const { file } = await collectStreamToFile({ fileStream, fileName: document.name, mimeType: document.mimeType });
 
-  const { text } = await extractDocumentText({ file, ocrLanguages });
+  const { text } = await extractDocumentText({ file, ocrLanguages, config });
 
   await documentsRepository.updateDocument({ documentId, organizationId, content: text });
 }

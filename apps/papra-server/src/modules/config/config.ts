@@ -83,6 +83,14 @@ export const configDefinition = {
     },
   },
 
+  gemini: {
+    apiKey: {
+      doc: 'The API key for Google Gemini.',
+      schema: z.string().min(1),
+      env: 'GEMINI_API_KEY',
+    },
+  },
+
   database: databaseConfig,
   documents: documentsConfig,
   documentsStorage: documentStorageConfig,

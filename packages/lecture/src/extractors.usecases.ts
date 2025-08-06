@@ -18,7 +18,7 @@ export async function extractText({ arrayBuffer, mimeType, config: rawConfig }: 
   }
 
   try {
-    const { content } = await extractor.extract({ arrayBuffer, config });
+    const { content } = await extractor.extract({ arrayBuffer, config, mimeType });
 
     return {
       extractorName: extractor.name,

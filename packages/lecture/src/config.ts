@@ -16,6 +16,9 @@ export function parseConfig({ rawConfig = {} }: { rawConfig?: PartialExtractorCo
       tesseract: {
         languages: languages.length > 0 ? languages : ['eng'],
       },
+      gemini: {
+        apiKey: rawConfig.gemini?.apiKey,
+      },
     },
   };
 }

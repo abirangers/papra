@@ -1,30 +1,39 @@
 import { Buffer } from 'node:buffer';
-import { createWorker } from 'tesseract.js';
+import { GoogleGenAI } from '@google/genai';
 import { defineTextExtractor } from '../extractors.models';
 
-export async function extractTextFromImage(maybeArrayBuffer: ArrayBuffer | Buffer, { languages }: { languages: string[] }) {
-  const buffer = maybeArrayBuffer instanceof ArrayBuffer ? Buffer.from(maybeArrayBuffer) : maybeArrayBuffer;
-
-  const worker = await createWorker(languages);
-
-  const { data: { text } } = await worker.recognize(buffer);
-  await worker.terminate();
-
-  return text;
-}
-
 export const imageExtractorDefinition = defineTextExtractor({
-  name: 'image',
+  name: 'gemini', // Changed name to reflect the new engine
   mimeTypes: [
     'image/png',
     'image/jpeg',
     'image/webp',
     'image/gif',
   ],
-  extract: async ({ arrayBuffer, config }) => {
-    const { languages } = config.tesseract;
+  extract: async ({ arrayBuffer, config, mimeType }) => {
+    const { apiKey } = config.gemini;
 
-    const content = await extractTextFromImage(arrayBuffer, { languages });
+    if (!apiKey) {
+      throw new Error('Gemini API key is missing. Please provide it in the configuration.');
+    }
+
+    const genAI = new GoogleGenAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+
+    const prompt = "Extract all text from this document. Provide only the text content without any additional formatting or explanation.";
+
+    const buffer = arrayBuffer instanceof ArrayBuffer ? Buffer.from(arrayBuffer) : arrayBuffer;
+
+    const imagePart = {
+      inlineData: {
+        data: buffer.toString('base64'),
+        mimeType,
+      },
+    };
+
+    const result = await model.generateContent([prompt, imagePart]);
+    const response = await result.response;
+    const content = response.text();
 
     return { content };
   },

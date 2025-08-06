@@ -14,16 +14,23 @@ export async function getFileSha256Hash({ file }: { file: File }) {
   };
 }
 
+import type { Config } from '../config/config.types';
+
 export async function extractDocumentText({
   file,
   ocrLanguages,
+  config,
   logger = createLogger({ namespace: 'documents:services' }),
 }: {
   file: File;
   ocrLanguages?: string[];
   logger?: Logger;
+  config: Config;
 }) {
-  const { textContent, error, extractorName } = await extractTextFromFile({ file, config: { tesseract: { languages: ocrLanguages } } });
+  const { textContent, error, extractorName } = await extractTextFromFile({
+    file,
+    config: { tesseract: { languages: ocrLanguages }, gemini: { apiKey: config.gemini.apiKey } },
+  });
 
   if (error) {
     logger.error({ error, extractorName }, 'Error while extracting text from document');
