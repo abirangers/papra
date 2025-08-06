@@ -168,6 +168,7 @@ const UpdateOrganizationNameCard: Component<{ organization: Organization }> = (p
 export const OrganizationsSettingsPage: Component = () => {
   const params = useParams();
   const { t } = useI18n();
+  const { config } = useConfig();
 
   const query = useQuery(() => ({
     queryKey: ['organizations', params.organizationId],
@@ -190,7 +191,9 @@ export const OrganizationsSettingsPage: Component = () => {
 
               <div class="mt-6 flex flex-col gap-6">
                 <UpdateOrganizationNameCard organization={getOrganization()} />
-                <AiTaggingSettingsCard organization={getOrganization()} />
+                <Show when={config.isAiTaggingEnabled}>
+                  <AiTaggingSettingsCard organization={getOrganization()} />
+                </Show>
                 <SubscriptionCard organization={getOrganization()} />
                 <DeleteOrganizationCard organization={getOrganization()} />
               </div>
