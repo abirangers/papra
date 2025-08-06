@@ -1,7 +1,7 @@
 // Do not manually edit this file.
 // This file is dynamically generated when the dev server runs (or using the `pnpm script:generate-i18n-types` command).
 // Keys are extracted from the en.yml file.
-// Source code : src/plugins/i18n-types/i18n-types.services.ts
+// Source code : src\plugins\i18n-types\i18n-types.services.ts
 
 export type LocaleKeys =
   | 'auth.request-password-reset.title'
@@ -124,6 +124,10 @@ export type LocaleKeys =
   | 'organization.settings.delete.confirm.confirm-button'
   | 'organization.settings.delete.confirm.cancel-button'
   | 'organization.settings.delete.success'
+  | 'organization.settings.ai-tagging.title'
+  | 'organization.settings.ai-tagging.description'
+  | 'organization.settings.ai-tagging.enable-label'
+  | 'organization.settings.ai-tagging.updated'
   | 'organizations.members.title'
   | 'organizations.members.description'
   | 'organizations.members.invite-member'
