@@ -1,10 +1,10 @@
 import type { Component } from 'solid-js';
 import type { Organization } from '../organizations.types';
 import { useI18n } from '@/modules/i18n/i18n.provider';
-import { useUpdateOrganization } from '../organizations.composables';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/modules/ui/components/card';
-import { Switch } from '@/modules/ui/components/switch';
 import { createToast } from '@/modules/ui/components/sonner';
+import { Switch } from '@/modules/ui/components/switch';
+import { useUpdateOrganization } from '../organizations.composables';
 
 export const AiTaggingSettingsCard: Component<{ organization: Organization }> = (props) => {
   const { t } = useI18n();

@@ -89,24 +89,24 @@ export const RequestPasswordResetPage: Component = () => {
           </h1>
 
           {getHasPasswordResetBeenRequested()
-            ? (
-                <>
-                  <div class="text-muted-foreground mt-1 mb-4">
-                    {t('auth.request-password-reset.requested')}
-                  </div>
+? (
+            <>
+              <div class="text-muted-foreground mt-1 mb-4">
+                {t('auth.request-password-reset.requested')}
+              </div>
 
-                  <OpenEmailProvider email={getEmail()} variant="secondary" class="w-full mb-4" />
-                </>
-              )
-            : (
-                <>
-                  <p class="text-muted-foreground mt-1 mb-4">
-                    {t('auth.request-password-reset.description')}
-                  </p>
+              <OpenEmailProvider email={getEmail()} variant="secondary" class="w-full mb-4" />
+            </>
+          )
+: (
+            <>
+              <p class="text-muted-foreground mt-1 mb-4">
+                {t('auth.request-password-reset.description')}
+              </p>
 
-                  <ResetPasswordForm onSubmit={onPasswordResetRequested} />
-                </>
-              )}
+              <ResetPasswordForm onSubmit={onPasswordResetRequested} />
+            </>
+          )}
 
           <Button as={A} href="/login" class="w-full" variant={getHasPasswordResetBeenRequested() ? 'default' : 'ghost'}>
             <div class="i-tabler-arrow-left mr-2 size-4" />

@@ -32,6 +32,7 @@ import { createDocumentAlreadyExistsError, createDocumentNotDeletedError, create
 import { buildOriginalDocumentKey, generateDocumentId as generateDocumentIdImpl } from './documents.models';
 import { createDocumentsRepository } from './documents.repository';
 import { extractDocumentText, getFileSha256Hash } from './documents.services';
+
 import { createDocumentStorageService } from './storage/documents.storage.services';
 
 export async function createDocument({
@@ -403,8 +404,6 @@ export async function deleteAllTrashDocuments({
     documents.map(async document => limit(async () => hardDeleteDocument({ document, documentsRepository, documentsStorageService }))),
   );
 }
-
-import { createOrganizationsRepository } from '../organizations/organizations.repository';
 
 export async function extractAndSaveDocumentFileContent({
   documentId,

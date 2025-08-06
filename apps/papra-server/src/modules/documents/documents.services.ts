@@ -1,5 +1,7 @@
 import type { Logger } from '@crowlog/logger';
+import type { Config } from '../config/config.types';
 import { extractTextFromFile } from '@papra/lecture';
+
 import { createLogger } from '../shared/logger/logger';
 
 export async function getFileSha256Hash({ file }: { file: File }) {
@@ -13,8 +15,6 @@ export async function getFileSha256Hash({ file }: { file: File }) {
     hash: hashHex,
   };
 }
-
-import type { Config } from '../config/config.types';
 
 export async function extractDocumentText({
   file,

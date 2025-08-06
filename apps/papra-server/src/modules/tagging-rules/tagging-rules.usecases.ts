@@ -1,11 +1,16 @@
+import type { Config } from '../config/config.types';
 import type { Document } from '../documents/documents.types';
+import type { OrganizationsRepository } from '../organizations/organizations.repository';
 import type { Logger } from '../shared/logger/logger';
 import type { TagsRepository } from '../tags/tags.repository';
 import type { TaggingRuleOperatorValidatorRegistry } from './conditions/tagging-rule-conditions.registry';
 import type { TaggingRulesRepository } from './tagging-rules.repository';
 import type { TaggingRuleField, TaggingRuleOperator } from './tagging-rules.types';
 import { safely, safelySync } from '@corentinth/chisels';
+import { GoogleGenAI } from '@google/genai';
+
 import { uniq } from 'lodash-es';
+import { z } from 'zod';
 import { createLogger } from '../shared/logger/logger';
 import { createTaggingRuleOperatorValidatorRegistry } from './conditions/tagging-rule-conditions.registry';
 import { getDocumentFieldValue } from './tagging-rules.models';
@@ -50,31 +55,42 @@ export async function createTaggingRule({
   ]);
 }
 
-import { GoogleGenAI } from '@google/genai';
-import { createOrganizationsRepository } from '../organizations/organizations.repository';
-import { Config } from '../config/config.types';
-import { OrganizationsRepository } from '../organizations/organizations.repository';
+const AITagsSchema = z.array(z.string());
 
-async function getAiSuggestedTags({ content, apiKey }: { content: string; apiKey: string }): Promise<string[]> {
+async function getAiSuggestedTags({
+  content,
+  apiKey,
+  logger,
+}: {
+  content: string;
+  apiKey: string;
+  logger: Logger;
+}): Promise<string[]> {
   if (!apiKey) {
     return [];
   }
 
-  const genAI = new GoogleGenAI(apiKey);
-  const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
-
-  const prompt = `You are an expert document archivist. Based on the following document content, suggest a maximum of 5 relevant tags. Return the tags as a JSON array of strings. For example: ["invoice", "finance", "2024"]. Do not return anything else but the JSON array. The content is: "${content}"`;
-
   try {
+    const genAI = new GoogleGenAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+
+    const prompt = `You are an expert document archivist. Based on the following document content, suggest a maximum of 5 relevant tags. Return the tags as a JSON array of strings. For example: ["invoice", "finance", "2024"]. Do not return anything else but the JSON array. The content is: "${content}"`;
+
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text().trim().replace(/```json|```/g, '');
-    const tags = JSON.parse(text);
-    if (Array.isArray(tags) && tags.every(t => typeof t === 'string')) {
-      return tags;
+    const json = JSON.parse(text);
+
+    const parsed = AITagsSchema.safeParse(json);
+
+    if (parsed.success) {
+      return parsed.data;
     }
+
+    logger.error({ error: parsed.error, text }, 'Failed to parse AI suggested tags');
     return [];
   } catch (error) {
+    logger.error({ error }, 'Failed to get AI suggested tags from the provider');
     return [];
   }
 }
@@ -114,21 +130,29 @@ export async function applyTaggingRules({
   const { organization } = await organizationsRepository.getOrganizationById({ organizationId: document.organizationId });
   let aiSuggestedTagIds: string[] = [];
   if (organization?.aiTaggingEnabled && document.content) {
-    const suggestedTagNames = await getAiSuggestedTags({ content: document.content, apiKey: config.gemini.apiKey });
+    const suggestedTagNames = await getAiSuggestedTags({ content: document.content, apiKey: config.gemini.apiKey, logger });
     if (suggestedTagNames.length > 0) {
       const { tags: existingOrgTags } = await tagsRepository.getOrganizationTags({ organizationId: document.organizationId });
       const lowercasedExistingTags = new Map(existingOrgTags.map(t => [t.name.toLowerCase(), t]));
 
-      const tagIds = await Promise.all(suggestedTagNames.map(async (tagName) => {
-        const existingTag = lowercasedExistingTags.get(tagName.toLowerCase());
-        if (existingTag) {
-          return existingTag.id;
-        }
-        const color = `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`;
-        const { tag: newTag } = await tagsRepository.createTag({ tag: { name: tagName, color, organizationId: document.organizationId } });
-        return newTag?.id;
-      }));
-      aiSuggestedTagIds = tagIds.filter(id => id !== undefined) as string[];
+      const newTagNames = suggestedTagNames.filter(name => !lowercasedExistingTags.has(name.toLowerCase()));
+      const existingTagIds = suggestedTagNames
+        .map(name => lowercasedExistingTags.get(name.toLowerCase())?.id)
+        .filter((id): id is string => !!id);
+
+      let newTagIds: string[] = [];
+      if (newTagNames.length > 0) {
+        const { tags: newTags } = await tagsRepository.createManyTags({
+          tags: newTagNames.map(name => ({
+            name,
+            color: `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`,
+            organizationId: document.organizationId,
+          })),
+        });
+        newTagIds = newTags.map(t => t.id);
+      }
+
+      aiSuggestedTagIds = [...existingTagIds, ...newTagIds];
     }
   }
 

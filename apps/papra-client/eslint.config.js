@@ -22,5 +22,6 @@ export default antfu({
       varsIgnorePattern: '^_',
       caughtErrorsIgnorePattern: '^_',
     }],
+    'style/indent': 'off',
   },
 });

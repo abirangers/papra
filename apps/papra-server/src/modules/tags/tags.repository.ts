@@ -23,6 +23,7 @@ export function createTagsRepository({ db }: { db: Database }) {
       addTagsToDocument,
       removeTagFromDocument,
       removeAllTagsFromDocument,
+      createManyTags,
     },
     { db },
   );
@@ -79,6 +80,14 @@ async function createTag({ tag, db }: { tag: DbInsertableTag; db: Database }) {
   const [createdTag] = result;
 
   return { tag: createdTag };
+}
+
+async function createManyTags({ tags, db }: { tags: DbInsertableTag[]; db: Database }) {
+  if (tags.length === 0) {
+    return { tags: [] };
+  }
+  const createdTags = await db.insert(tagsTable).values(tags).returning();
+  return { tags: createdTags };
 }
 
 async function deleteTag({ tagId, db }: { tagId: string; db: Database }) {
