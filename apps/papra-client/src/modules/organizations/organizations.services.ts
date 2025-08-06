@@ -34,11 +34,19 @@ export async function createOrganization({ name }: { name: string }) {
   };
 }
 
-export async function updateOrganization({ organizationId, name }: { organizationId: string; name: string }) {
+export async function updateOrganization({
+  organizationId,
+  name,
+  aiTaggingEnabled,
+}: {
+  organizationId: string;
+  name?: string;
+  aiTaggingEnabled?: boolean;
+}) {
   const { organization } = await apiClient<{ organization: AsDto<Organization> }>({
     path: `/api/organizations/${organizationId}`,
-    method: 'PUT',
-    body: { name },
+    method: 'PATCH',
+    body: { name, aiTaggingEnabled },
   });
 
   return {

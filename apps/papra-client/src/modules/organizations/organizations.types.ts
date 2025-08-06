@@ -4,6 +4,7 @@ import type { ORGANIZATION_INVITATION_STATUS_LIST } from './organizations.consta
 export type Organization = {
   id: string;
   name: string;
+  aiTaggingEnabled: boolean;
   createdAt: Date;
   updatedAt: Date;
 };
