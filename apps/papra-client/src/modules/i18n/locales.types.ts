@@ -1,7 +1,7 @@
 // Do not manually edit this file.
 // This file is dynamically generated when the dev server runs (or using the `pnpm script:generate-i18n-types` command).
 // Keys are extracted from the en.yml file.
-// Source code : src/plugins/i18n-types/i18n-types.services.ts
+// Source code : src\plugins\i18n-types\i18n-types.services.ts
 
 export type LocaleKeys =
   | 'auth.request-password-reset.title'
