@@ -54,7 +54,7 @@ CREATE TABLE `organizations` (
 	`id` text PRIMARY KEY NOT NULL,
 	`created_at` integer NOT NULL,
 	`updated_at` integer NOT NULL,
-	`ai_tagging_enabled` integer DEFAULT true NOT NULL,
+	`ai_tagging_enabled` integer DEFAULT false NOT NULL,
 	`name` text NOT NULL,
 	`customer_id` text
 );

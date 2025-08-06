@@ -73,10 +73,28 @@ async function getAiSuggestedTags({
   try {
     const genAI = new GoogleGenAI(apiKey);
 
-    const prompt = `You are an expert document archivist. Based on the following document content, suggest a maximum of 5 relevant tags. Return the tags as a JSON array of strings. For example: ["invoice", "finance", "2024"]. Do not return anything else but the JSON array. The content is: "${content}"`;
+    const prompt = `As an expert document archivist, your role is to generate relevant tags for the following document.
+
+**Instructions:**
+1.  Carefully read and understand the main subject, purpose, and key entities in the document content.
+2.  Generate a maximum of 5 tags that best summarize the document.
+3.  The tags must be concise, specific, and directly related to the content.
+4.  Your final output must be ONLY a single, valid JSON array of strings, with no additional text or explanations before or after it.
+
+**Good Tag Examples:**
+- ["invoice", "project-alpha", "q3-2024"]
+- ["legal-contract", "nda", "acme-corp"]
+
+**Bad Tag Examples:**
+- ["important", "document", "text"]
+
+**Content to Analyze:**
+\`\`\`
+${content}
+\`\`\``;
 
     const response = await genAI.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemma-3n-e4b-it',
       contents: [{
         role: 'user',
         parts: [{ text: prompt }],

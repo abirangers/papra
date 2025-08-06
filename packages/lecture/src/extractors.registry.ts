@@ -18,8 +18,13 @@ export function getExtractor({
   mimeType: string;
   extractors?: ExtractorDefinition[];
 }) {
+  console.log(`[Extractor Registry] Getting extractor for MIME type: "${mimeType}"`);
   const wilcardedMimeType = mimeType.replace(/\/.*/, '/*');
   const extractor = extractors.find(extractor => extractor.mimeTypes.includes(mimeType) || extractor.mimeTypes.includes(wilcardedMimeType));
+
+  if (!extractor) {
+    console.log(`[Extractor Registry] No extractor found for MIME type: "${mimeType}"`);
+  }
 
   return {
     extractor,

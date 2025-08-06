@@ -18,7 +18,7 @@ export const imageExtractorDefinition = defineTextExtractor({
     }
 
     const genAI = new GoogleGenAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemma-3n-e4b-it' });
 
     const prompt = "Extract all text from this document. Provide only the text content without any additional formatting or explanation.";
 
