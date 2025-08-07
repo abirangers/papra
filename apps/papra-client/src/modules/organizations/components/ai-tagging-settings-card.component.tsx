@@ -11,6 +11,7 @@ export const AiTaggingSettingsCard: Component<{ organization: Organization }> = 
   const { updateOrganization } = useUpdateOrganization();
 
   const handleToggle = async (checked: boolean) => {
+    console.log('AI Tagging Enabled:', checked);
     await updateOrganization({
       organizationId: props.organization.id,
       aiTaggingEnabled: checked,
