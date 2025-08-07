@@ -334,9 +334,9 @@ importers:
       nodemailer:
         specifier: ^7.0.3
         version: 7.0.5
-      ollama-node:
-        specifier: ^0.1.28
-        version: 0.1.28
+      ollama:
+        specifier: ^0.5.16
+        version: 0.5.16
       p-limit:
         specifier: ^6.2.0
         version: 6.2.0
@@ -502,9 +502,9 @@ importers:
       mammoth:
         specifier: ^1.10.0
         version: 1.10.0
-      ollama-node:
-        specifier: ^0.1.28
-        version: 0.1.28
+      ollama:
+        specifier: ^0.5.16
+        version: 0.5.16
       sharp:
         specifier: ^0.32.6
         version: 0.32.6
@@ -2536,9 +2536,6 @@ packages:
 
   '@types/node@17.0.45':
     resolution: {integrity: sha512-w+tIMs3rq2afQdsPJlODhoUEKzFP1ayaoyl1CcnwtIlsVe7K7bA1NGm4s3PraqTLlXnbIN84zuBlxBWo1u9BLw==}
-
-  '@types/node@20.19.9':
-    resolution: {integrity: sha512-cuVNgarYWZqxRJDQHEB58GEONhOK79QVR/qYx4S7kcUObQvUwvFnYxJuuHUKm2aieN9X3yZB4LZsuYNU1Qphsw==}
 
   '@types/node@22.17.0':
     resolution: {integrity: sha512-bbAKTCqX5aNVryi7qXVMi+OkB3w/OyblodicMbvE38blyAz7GxXf6XYhklokijuPwwVg9sDLKRxt0ZHXQwZVfQ==}
@@ -5313,8 +5310,8 @@ packages:
   ohash@2.0.11:
     resolution: {integrity: sha512-RdR9FQrFwNBNXAr4GixM8YaRZRJ5PUWbKYbE5eOsrwAjJW0q2REGcf79oYPsLyskQCZG1PLN+S/K1V00joZAoQ==}
 
-  ollama-node@0.1.28:
-    resolution: {integrity: sha512-xGxFceX9lRg9YBIbcGu2TGCowVdIKwfr36c7HiLAJgd2r7HNH//ZCbhoKvpkJp0YV91uF772bCAKdiIGAOSwbA==}
+  ollama@0.5.16:
+    resolution: {integrity: sha512-OEbxxOIUZtdZgOaTPAULo051F5y+Z1vosxEYOoABPnQKeW7i4O8tJNlxCB+xioyoorVqgjkdj+TA1f1Hy2ug/w==}
 
   once@1.4.0:
     resolution: {integrity: sha512-lNaJgI+2Q5URQBkccEKHTQOPaXdUxnZZElQTZY0MFUAuaEqe1E+Nyvgdz/aIyNi6Z9MzO5dv1H8n58/GELp3+w==}
@@ -6900,6 +6897,9 @@ packages:
   whatwg-encoding@3.1.1:
     resolution: {integrity: sha512-6qN4hJdMwfYBtE3YBTTHhoeuUrDBPZmbQaxWAqSALV/MeEnR5z1xd8UKud2RAkFoPkmB+hli1TZSnyi84xz1vQ==}
     engines: {node: '>=18'}
+
+  whatwg-fetch@3.6.20:
+    resolution: {integrity: sha512-EqhiFU6daOA8kpjOWTL0olhVOF3i7OrFzSYiGsEMB8GcXS+RrzauAERX65xMeNWVqxA6HXH2m69Z9LaKKdisfg==}
 
   whatwg-mimetype@4.0.0:
     resolution: {integrity: sha512-QaKxh0eNIi2mE9p2vEdzfagOKHCcj1pJ56EEHGQOVxp8r9/iszLUUV7v89x9O1p/T+NlTM5W7jW6+cz4Fq1YVg==}
@@ -9776,10 +9776,6 @@ snapshots:
   '@types/node@12.20.55': {}
 
   '@types/node@17.0.45': {}
-
-  '@types/node@20.19.9':
-    dependencies:
-      undici-types: 6.21.0
 
   '@types/node@22.17.0':
     dependencies:
@@ -13262,9 +13258,9 @@ snapshots:
 
   ohash@2.0.11: {}
 
-  ollama-node@0.1.28:
+  ollama@0.5.16:
     dependencies:
-      '@types/node': 20.19.9
+      whatwg-fetch: 3.6.20
 
   once@1.4.0:
     dependencies:
@@ -15120,6 +15116,8 @@ snapshots:
   whatwg-encoding@3.1.1:
     dependencies:
       iconv-lite: 0.6.3
+
+  whatwg-fetch@3.6.20: {}
 
   whatwg-mimetype@4.0.0: {}
 

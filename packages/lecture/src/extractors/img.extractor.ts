@@ -1,5 +1,5 @@
 import { Buffer } from 'node:buffer';
-import { Ollama } from 'ollama-node';
+import { Ollama } from 'ollama';
 import { defineTextExtractor } from '../extractors.models';
 
 export const imageExtractorDefinition = defineTextExtractor({
@@ -13,15 +13,19 @@ export const imageExtractorDefinition = defineTextExtractor({
   extract: async ({ arrayBuffer, config }) => {
     const { baseUrl, model } = config.ollama;
 
-    const ollama = new Ollama(baseUrl);
+    const ollamaClient = new Ollama({ host: baseUrl });
 
     const prompt = "Extract all text from this document. Provide only the text content without any additional formatting or explanation.";
 
     const buffer = arrayBuffer instanceof ArrayBuffer ? Buffer.from(arrayBuffer) : arrayBuffer;
     const image = buffer.toString('base64');
 
-    const result = await ollama.generate(model, prompt, [image]);
+    const result = await ollamaClient.generate({
+      model,
+      prompt,
+      images: [image],
+    });
 
-    return { content: result.output };
+    return { content: result.response };
   },
 });

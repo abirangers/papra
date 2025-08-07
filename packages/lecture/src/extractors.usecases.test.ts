@@ -1,10 +1,22 @@
 import fs from 'node:fs/promises';
 import mime from 'mime';
 import { glob } from 'tinyglobby';
-import { describe, expect, test } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
+import { Ollama } from 'ollama';
 import { extractText, extractTextFromBlob, extractTextFromFile } from './extractors.usecases';
 
 const fixturesDir = await glob(['fixtures/*'], { onlyDirectories: true });
+
+vi.mock('ollama', () => {
+  class OllamaMock {
+    generate() {
+      return Promise.resolve({ response: 'mocked ollama response' });
+    }
+  }
+  return {
+    Ollama: OllamaMock,
+  };
+});
 
 describe('extractors usecases', () => {
   describe('extractText', () => {

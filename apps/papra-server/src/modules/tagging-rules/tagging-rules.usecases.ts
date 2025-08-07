@@ -8,7 +8,7 @@ import type { TaggingRulesRepository } from './tagging-rules.repository';
 import type { TaggingRuleField, TaggingRuleOperator } from './tagging-rules.types';
 import { safely, safelySync } from '@corentinth/chisels';
 import { uniq } from 'lodash-es';
-import { Ollama } from 'ollama-node';
+import { Ollama } from 'ollama';
 import { z } from 'zod';
 import { createLogger } from '../shared/logger/logger';
 import { createTaggingRuleOperatorValidatorRegistry } from './conditions/tagging-rule-conditions.registry';
@@ -71,16 +71,17 @@ async function getAiSuggestedTags({
   }
 
   try {
-    const url = new URL(baseUrl.startsWith('http') ? baseUrl : `http://${baseUrl}`);
-    const ollama = new Ollama({
-      host: url.hostname,
-      port: Number(url.port) || 11434,
+    const ollamaClient = new Ollama({
+      host: baseUrl,
     });
 
     const prompt = `You are an expert document archivist. Based on the following document content, suggest a maximum of 5 relevant tags. Return the tags as a JSON array of strings. For example: ["invoice", "finance", "2024"]. Do not return anything else but the JSON array. The content is: "${content}"`;
 
-    const response = await ollama.generate(model, prompt);
-    const text = response.output.trim().replace(/```json|```/g, '');
+    const response = await ollamaClient.generate({
+      model,
+      prompt,
+    });
+    const text = response.response.trim().replace(/```json|```/g, '');
     const json = JSON.parse(text);
 
     const parsed = AITagsSchema.safeParse(json);
