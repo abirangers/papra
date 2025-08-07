@@ -2,6 +2,7 @@ import { eq } from 'drizzle-orm';
 import { describe, expect, test } from 'vitest';
 import { createInMemoryDatabase } from '../app/database/database.test-utils';
 import { documentsTable } from '../documents/documents.table';
+import { createOrganizationsRepository } from '../organizations/organizations.repository';
 import { createTestLogger } from '../shared/logger/logger.test-utils';
 import { isNil } from '../shared/utils';
 import { createTagsRepository } from '../tags/tags.repository';
@@ -15,7 +16,7 @@ describe('tagging-rules usecases', () => {
       const { logger, getLogs } = createTestLogger();
 
       const { db } = await createInMemoryDatabase({
-        organizations: [{ id: 'org_1', name: 'Org 1' }],
+        organizations: [{ id: 'org_1', name: 'Org 1', aiTaggingEnabled: false }],
         tags: [{ id: 'tag_1', name: 'Tag 1', color: '#000000', organizationId: 'org_1' }],
         documents: [{ id: 'doc_1', organizationId: 'org_1', name: 'Doc 1', originalName: 'Doc 1', originalStorageKey: 'doc_1', originalSha256Hash: 'doc_1', mimeType: 'text/plain' }],
 
@@ -33,8 +34,10 @@ describe('tagging-rules usecases', () => {
 
       const taggingRulesRepository = createTaggingRulesRepository({ db });
       const tagsRepository = createTagsRepository({ db });
+      const organizationsRepository = createOrganizationsRepository({ db });
+      const config = { ollama: { baseUrl: 'http://localhost:11434', model: 'gemma' } } as any;
 
-      await applyTaggingRules({ document, taggingRulesRepository, tagsRepository, logger });
+      await applyTaggingRules({ document, config, taggingRulesRepository, tagsRepository, organizationsRepository, logger });
 
       const documentTags = await db.select().from(documentsTagsTable);
 
@@ -42,22 +45,25 @@ describe('tagging-rules usecases', () => {
 
       expect(getLogs({ excludeTimestampMs: true })).to.eql([
         {
-          data: {
-            tagIdsToApply: ['tag_1'],
-            appliedTagIds: ['tag_1'],
-            taggingRulesIdsToApply: ['tr_1'],
-            hasAllTagBeenApplied: true,
-          },
           level: 'info',
-          message: 'Tagging rules applied',
+          message: 'Tagging rules and suggestions applied',
           namespace: 'test',
+          data: {
+            ruleBasedTagIds: [
+              'tag_1',
+            ],
+            aiSuggestedTagIds: [],
+            appliedTagIds: [
+              'tag_1',
+            ],
+          },
         },
       ]);
     });
 
     test('a rule without conditions will apply its tags to all imported documents', async () => {
       const { db } = await createInMemoryDatabase({
-        organizations: [{ id: 'org_1', name: 'Org 1' }],
+        organizations: [{ id: 'org_1', name: 'Org 1', aiTaggingEnabled: false }],
         documents: [{ id: 'doc_1', organizationId: 'org_1', name: 'Doc 1', originalName: 'Doc 1', originalStorageKey: 'doc_1', originalSha256Hash: 'doc_1', mimeType: 'text/plain' }],
         tags: [{ id: 'tag_1', name: 'Tag 1', color: '#000000', organizationId: 'org_1' }],
         taggingRules: [{ id: 'tr_1', organizationId: 'org_1', name: 'Tagging Rule 1' }],
@@ -73,8 +79,10 @@ describe('tagging-rules usecases', () => {
 
       const taggingRulesRepository = createTaggingRulesRepository({ db });
       const tagsRepository = createTagsRepository({ db });
+      const organizationsRepository = createOrganizationsRepository({ db });
+      const config = { ollama: { baseUrl: 'http://localhost:11434', model: 'gemma' } } as any;
 
-      await applyTaggingRules({ document, taggingRulesRepository, tagsRepository });
+      await applyTaggingRules({ document, config, taggingRulesRepository, tagsRepository, organizationsRepository });
 
       const documentTags = await db.select().from(documentsTagsTable);
 
@@ -83,7 +91,7 @@ describe('tagging-rules usecases', () => {
 
     test('an organization with no tagging rules will not apply any tag to a document', async () => {
       const { db } = await createInMemoryDatabase({
-        organizations: [{ id: 'org_1', name: 'Org 1' }],
+        organizations: [{ id: 'org_1', name: 'Org 1', aiTaggingEnabled: false }],
         documents: [{ id: 'doc_1', organizationId: 'org_1', name: 'Doc 1', originalName: 'Doc 1', originalStorageKey: 'doc_1', originalSha256Hash: 'doc_1', mimeType: 'text/plain' }],
       });
 
@@ -96,8 +104,10 @@ describe('tagging-rules usecases', () => {
 
       const taggingRulesRepository = createTaggingRulesRepository({ db });
       const tagsRepository = createTagsRepository({ db });
+      const organizationsRepository = createOrganizationsRepository({ db });
+      const config = { ollama: { baseUrl: 'http://localhost:11434', model: 'gemma' } } as any;
 
-      await applyTaggingRules({ document, taggingRulesRepository, tagsRepository });
+      await applyTaggingRules({ document, config, taggingRulesRepository, tagsRepository, organizationsRepository });
 
       const documentTags = await db.select().from(documentsTagsTable);
 

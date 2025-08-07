@@ -44,6 +44,7 @@ describe('api-keys repository', () => {
             customerId: null,
             createdAt: new Date('2021-01-01'),
             updatedAt: new Date('2021-01-02'),
+            aiTaggingEnabled: false,
           }],
           createdAt: new Date('2021-03-01'),
           updatedAt: new Date('2021-03-02'),

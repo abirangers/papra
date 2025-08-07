@@ -71,7 +71,11 @@ async function getAiSuggestedTags({
   }
 
   try {
-    const ollama = new Ollama(baseUrl.replace(/^(https?:\/\/)/, ''));
+    const url = new URL(baseUrl.startsWith('http') ? baseUrl : `http://${baseUrl}`);
+    const ollama = new Ollama({
+      host: url.hostname,
+      port: Number(url.port) || 11434,
+    });
 
     const prompt = `You are an expert document archivist. Based on the following document content, suggest a maximum of 5 relevant tags. Return the tags as a JSON array of strings. For example: ["invoice", "finance", "2024"]. Do not return anything else but the JSON array. The content is: "${content}"`;
 

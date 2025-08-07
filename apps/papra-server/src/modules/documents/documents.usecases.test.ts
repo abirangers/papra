@@ -22,7 +22,7 @@ describe('documents usecases', () => {
       const taskServices = createInMemoryTaskServices();
       const { db } = await createInMemoryDatabase({
         users: [{ id: 'user-1', email: 'user-1@example.com' }],
-        organizations: [{ id: 'organization-1', name: 'Organization 1' }],
+        organizations: [{ id: 'organization-1', name: 'Organization 1', aiTaggingEnabled: false }],
         organizationMembers: [{ organizationId: 'organization-1', userId: 'user-1', role: ORGANIZATION_ROLES.OWNER }],
       });
 
@@ -79,7 +79,7 @@ describe('documents usecases', () => {
       const taskServices = createInMemoryTaskServices();
       const { db } = await createInMemoryDatabase({
         users: [{ id: 'user-1', email: 'user-1@example.com' }],
-        organizations: [{ id: 'organization-1', name: 'Organization 1' }],
+        organizations: [{ id: 'organization-1', name: 'Organization 1', aiTaggingEnabled: false }],
         organizationMembers: [{ organizationId: 'organization-1', userId: 'user-1', role: ORGANIZATION_ROLES.OWNER }],
       });
 
@@ -154,7 +154,7 @@ describe('documents usecases', () => {
       // When restoring the document, the tagging rule should apply tag-2
       const { db } = await createInMemoryDatabase({
         users: [{ id: 'user-1', email: 'user-1@example.com' }],
-        organizations: [{ id: 'organization-1', name: 'Organization 1' }],
+        organizations: [{ id: 'organization-1', name: 'Organization 1', aiTaggingEnabled: false }],
         organizationMembers: [{ organizationId: 'organization-1', userId: 'user-1', role: ORGANIZATION_ROLES.OWNER }],
         tags: [
           { id: 'tag-1', name: 'Tag 1', color: '#000000', organizationId: 'organization-1' },
@@ -193,16 +193,43 @@ describe('documents usecases', () => {
         documentsStorage: { driver: 'in-memory' },
       });
 
+      const documentsStorageService = await createDocumentStorageService({ config });
+      await documentsStorageService.saveFile({
+        file: new File(['hello world'], 'file-1.txt', { type: 'text/plain' }),
+        storageKey: 'organization-1/originals/document-1.txt',
+      });
+
+      const documentsRepository = createDocumentsRepository({ db });
+      const tagsRepository = createTagsRepository({ db });
+      const taggingRulesRepository = createTaggingRulesRepository({ db });
+      const organizationsRepository = createOrganizationsRepository({ db });
+
       const createDocument = await createDocumentCreationUsecase({
         db,
         config,
         taskServices,
+        documentsStorageService,
+        documentsRepository,
+        tagsRepository,
+        taggingRulesRepository,
+        organizationsRepository,
       });
 
       // 3. Re-create the document
       const { document: documentRestored } = await createDocument({
         file: new File(['hello world'], 'file-2.txt', { type: 'text/plain' }),
         organizationId: 'organization-1',
+      });
+
+      await extractAndSaveDocumentFileContent({
+        documentId: documentRestored.id,
+        organizationId: documentRestored.organizationId,
+        documentsRepository,
+        documentsStorageService,
+        config,
+        tagsRepository,
+        taggingRulesRepository,
+        organizationsRepository,
       });
 
       await nextTick();
@@ -235,7 +262,7 @@ describe('documents usecases', () => {
       const taskServices = createInMemoryTaskServices();
       const { db } = await createInMemoryDatabase({
         users: [{ id: 'user-1', email: 'user-1@example.com' }],
-        organizations: [{ id: 'organization-1', name: 'Organization 1' }],
+        organizations: [{ id: 'organization-1', name: 'Organization 1', aiTaggingEnabled: false }],
         organizationMembers: [{ organizationId: 'organization-1', userId: 'user-1', role: ORGANIZATION_ROLES.OWNER }],
       });
 
@@ -285,7 +312,7 @@ describe('documents usecases', () => {
       const taskServices = createInMemoryTaskServices();
       const { db } = await createInMemoryDatabase({
         users: [{ id: 'user-1', email: 'user-1@example.com' }],
-        organizations: [{ id: 'organization-1', name: 'Organization 1' }],
+        organizations: [{ id: 'organization-1', name: 'Organization 1', aiTaggingEnabled: false }],
         organizationMembers: [{ organizationId: 'organization-1', userId: 'user-1', role: ORGANIZATION_ROLES.OWNER }],
       });
 
@@ -339,7 +366,7 @@ describe('documents usecases', () => {
     test('given a stored document, its content is extracted and saved in the db', async () => {
       const { db } = await createInMemoryDatabase({
         users: [{ id: 'user-1', email: 'user-1@example.com' }],
-        organizations: [{ id: 'organization-1', name: 'Organization 1' }],
+        organizations: [{ id: 'organization-1', name: 'Organization 1', aiTaggingEnabled: false }],
         organizationMembers: [{ organizationId: 'organization-1', userId: 'user-1', role: ORGANIZATION_ROLES.OWNER }],
       });
 
