@@ -13,6 +13,7 @@ import { registerUsersRoutes } from '../users/users.routes';
 import { registerWebhooksRoutes } from '../webhooks/webhook.routes';
 import { registerAuthRoutes } from './auth/auth.routes';
 import { registerHealthCheckRoutes } from './health-check/health-check.routes';
+import { registerIngestionFoldersRoutes } from '../ingestion-folders/ingestion-folders.routes';
 
 export function registerRoutes(context: RouteDefinitionContext) {
   registerAuthRoutes(context);
@@ -29,4 +30,5 @@ export function registerRoutes(context: RouteDefinitionContext) {
   registerWebhooksRoutes(context);
   registerInvitationsRoutes(context);
   registerDocumentActivityRoutes(context);
+  registerIngestionFoldersRoutes(context);
 }

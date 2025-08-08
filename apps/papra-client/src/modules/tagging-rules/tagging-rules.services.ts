@@ -43,3 +43,11 @@ export async function updateTaggingRule({ organizationId, taggingRuleId, tagging
     body: taggingRule,
   });
 }
+
+export async function applyTaggingTemplates({ organizationId, templates }: { organizationId: string; templates: Array<'finance'|'legal'|'personal'> }) {
+  await apiClient({
+    path: `/api/organizations/${organizationId}/tagging-rules/apply-template`,
+    method: 'POST',
+    body: { templates },
+  });
+}

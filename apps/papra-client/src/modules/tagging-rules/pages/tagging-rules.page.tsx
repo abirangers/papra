@@ -8,6 +8,7 @@ import { useI18n } from '@/modules/i18n/i18n.provider';
 import { queryClient } from '@/modules/shared/query/query-client';
 import { Alert } from '@/modules/ui/components/alert';
 import { Button } from '@/modules/ui/components/button';
+import { applyTaggingTemplates } from '../tagging-rules.services';
 import { EmptyState } from '@/modules/ui/components/empty';
 import { deleteTaggingRule, fetchTaggingRules } from '../tagging-rules.services';
 
@@ -87,6 +88,11 @@ export const TaggingRulesPage: Component = () => {
     queryFn: () => fetchTaggingRules({ organizationId: params.organizationId }),
   }));
 
+  const applyTemplates = async () => {
+    await applyTaggingTemplates({ organizationId: params.organizationId, templates: ['finance','legal','personal'] });
+    await query.refetch();
+  };
+
   return (
     <div class="p-6 max-w-screen-lg mx-auto mt-4">
       <div class="border-b mb-6 pb-4 flex items-center justify-between gap-4 sm:flex-row flex-col">
@@ -100,12 +106,18 @@ export const TaggingRulesPage: Component = () => {
           </p>
         </div>
 
-        <Show when={query.data?.taggingRules.length}>
+        <div class="flex gap-2">
+          <Button variant="outline" onClick={applyTemplates} class="flex items-center gap-2 flex-shrink-0 sm:w-auto w-full">
+            <div class="i-tabler-magic-wand size-4" />
+            Apply templates
+          </Button>
+          <Show when={query.data?.taggingRules.length}>
           <Button as={A} href={`/organizations/${params.organizationId}/tagging-rules/create`} class="flex items-center gap-2 flex-shrink-0 sm:w-auto w-full">
             <div class="i-tabler-plus size-4" />
             {t('tagging-rules.list.no-tagging-rules.create-tagging-rule')}
           </Button>
-        </Show>
+          </Show>
+        </div>
       </div>
 
       <Show when={config.isDemoMode}>

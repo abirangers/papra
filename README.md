@@ -84,6 +84,26 @@ docker run -d --name papra -p 1221:1221 ghcr.io/papra-hq/papra:latest
 
 Please refer to the [self-hosting documentation](https://docs.papra.app/self-hosting/using-docker) for more information and configuration options.
 
+### Quick Start (docker compose)
+
+```bash
+cd docker
+docker compose up -d --build
+```
+
+Volumes created:
+- `papra_db`: database
+- `papra_docs`: files storage
+- `papra_ingestion`: ingestion root
+
+Environment overrides via `.env` next to `docker-compose.yml`:
+- `APP_BASE_URL`, `CLIENT_BASE_URL`, `SERVER_BASE_URL`
+- `TRUSTED_ORIGINS`, `SERVER_CORS_ORIGINS`
+- `GEMINI_API_KEY` (optional)
+- `INGESTION_FOLDER_ROOT_PATH`
+
+Base example env: `apps/papra-server/ENV.example`.
+
 ## Contributing
 
 Contributions are welcome! Please refer to the [`CONTRIBUTING.md`](./CONTRIBUTING.md) file for guidelines on how to get started, report issues, and submit pull requests.

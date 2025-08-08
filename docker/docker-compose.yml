@@ -1,0 +1,30 @@
+version: '3.9'
+services:
+  papra:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: papra
+    ports:
+      - "1221:1221"
+    environment:
+      - NODE_ENV=production
+      - APP_BASE_URL=${APP_BASE_URL:-http://localhost:1221}
+      - CLIENT_BASE_URL=${CLIENT_BASE_URL:-http://localhost:1221}
+      - SERVER_BASE_URL=${SERVER_BASE_URL:-http://localhost:1221}
+      - TRUSTED_ORIGINS=${TRUSTED_ORIGINS:-http://localhost:1221}
+      - SERVER_CORS_ORIGINS=${SERVER_CORS_ORIGINS:-http://localhost:1221}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - INGESTION_FOLDER_ROOT_PATH=${INGESTION_FOLDER_ROOT_PATH:-./ingestion}
+      - SERVER_SERVE_PUBLIC_DIR=true
+      - EMAILS_DRY_RUN=true
+    volumes:
+      - papra_db:/app/app-data/db
+      - papra_docs:/app/app-data/documents
+      - papra_ingestion:/app/ingestion
+volumes:
+  papra_db:
+  papra_docs:
+  papra_ingestion:
+
+

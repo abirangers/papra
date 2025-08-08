@@ -16,6 +16,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { createToast } from '@/modules/ui/components/sonner';
 import { TextField, TextFieldLabel, TextFieldRoot } from '@/modules/ui/components/textfield';
 import { AiTaggingSettingsCard } from '../components/ai-tagging-settings-card.component';
+import { IngestionSettingsCard } from '../components/ingestion-settings-card.component';
 import { useDeleteOrganization, useUpdateOrganization } from '../organizations.composables';
 import { organizationNameSchema } from '../organizations.schemas';
 import { fetchOrganization } from '../organizations.services';
@@ -194,6 +195,7 @@ export const OrganizationsSettingsPage: Component = () => {
                 <Show when={config.isAiTaggingEnabled}>
                   <AiTaggingSettingsCard organization={getOrganization()} />
                 </Show>
+                <IngestionSettingsCard />
                 <SubscriptionCard organization={getOrganization()} />
                 <DeleteOrganizationCard organization={getOrganization()} />
               </div>

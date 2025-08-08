@@ -12,6 +12,9 @@ import { TAGGING_RULE_FIELDS, TAGGING_RULE_OPERATORS } from './tagging-rules.con
 import { createTaggingRulesRepository } from './tagging-rules.repository';
 import { taggingRuleIdSchema } from './tagging-rules.schemas';
 import { createTaggingRule } from './tagging-rules.usecases';
+import { createTagsRepository } from '../tags/tags.repository';
+import { createTaggingRulesRepository } from './tagging-rules.repository';
+import { createTaggingRulesTemplate } from './tagging-rules.templates';
 
 export function registerTaggingRulesRoutes(context: RouteDefinitionContext) {
   setupGetOrganizationTaggingRulesRoute(context);
@@ -19,6 +22,7 @@ export function registerTaggingRulesRoutes(context: RouteDefinitionContext) {
   setupDeleteTaggingRuleRoute(context);
   setupGetTaggingRuleRoute(context);
   setupUpdateTaggingRuleRoute(context);
+  setupApplyTemplatesRoute(context);
 }
 
 function setupGetOrganizationTaggingRulesRoute({ app, db }: RouteDefinitionContext) {
@@ -172,6 +176,30 @@ function setupUpdateTaggingRuleRoute({ app, db }: RouteDefinitionContext) {
       });
 
       return context.body(null, 204);
+    },
+  );
+}
+
+function setupApplyTemplatesRoute({ app, db }: RouteDefinitionContext) {
+  app.post(
+    '/api/organizations/:organizationId/tagging-rules/apply-template',
+    requireAuthentication(),
+    validateParams(z.object({ organizationId: organizationIdSchema })),
+    async (context) => {
+      const schema = z.object({ templates: z.array(z.enum(['finance','legal','personal'])).min(1) });
+      const body = await context.req.json();
+      const parsed = schema.safeParse(body);
+      if (!parsed.success) {
+        return context.body('Invalid input', 400);
+      }
+
+      const { organizationId } = context.req.valid('param');
+      const tagsRepository = createTagsRepository({ db });
+      const taggingRulesRepository = createTaggingRulesRepository({ db });
+
+      await createTaggingRulesTemplate({ organizationId, templates: parsed.data.templates, tagsRepository, taggingRulesRepository });
+
+      return context.json({ ok: true });
     },
   );
 }
