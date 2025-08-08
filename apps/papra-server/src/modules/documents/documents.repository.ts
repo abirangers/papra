@@ -2,7 +2,7 @@ import type { Database } from '../app/database/database.types';
 import type { DbInsertableDocument } from './documents.types';
 import { injectArguments, safely } from '@corentinth/chisels';
 import { subDays } from 'date-fns';
-import { and, count, desc, eq, getTableColumns, lt, sql, sum } from 'drizzle-orm';
+import { and, count, countDistinct, desc, eq, getTableColumns, inArray, lt, sql, sum } from 'drizzle-orm';
 import { omit } from 'lodash-es';
 import { createOrganizationNotFoundError } from '../organizations/organizations.errors';
 import { isUniqueConstraintError } from '../shared/db/constraints.models';
@@ -79,17 +79,39 @@ async function saveOrganizationDocument({ db, ...documentToInsert }: { db: Datab
 }
 
 async function getOrganizationDocumentsCount({ organizationId, filters, db }: { organizationId: string; filters?: { tags?: string[] }; db: Database }) {
+  if (filters?.tags && filters.tags.length > 0) {
+    const [record] = await db
+      .select({
+        documentsCount: countDistinct(documentsTable.id),
+      })
+      .from(documentsTable)
+      .innerJoin(documentsTagsTable, eq(documentsTable.id, documentsTagsTable.documentId))
+      .where(
+        and(
+          eq(documentsTable.organizationId, organizationId),
+          eq(documentsTable.isDeleted, false),
+          inArray(documentsTagsTable.tagId, filters.tags),
+        ),
+      );
+
+    if (isNil(record)) {
+      throw createOrganizationNotFoundError();
+    }
+
+    const { documentsCount } = record;
+
+    return { documentsCount };
+  }
+
   const [record] = await db
     .select({
       documentsCount: count(documentsTable.id),
     })
     .from(documentsTable)
-    .leftJoin(documentsTagsTable, eq(documentsTable.id, documentsTagsTable.documentId))
     .where(
       and(
         eq(documentsTable.organizationId, organizationId),
         eq(documentsTable.isDeleted, false),
-        ...(filters?.tags ? filters.tags.map(tag => eq(documentsTagsTable.tagId, tag)) : []),
       ),
     );
 
@@ -149,7 +171,7 @@ async function getOrganizationDocuments({
       and(
         eq(documentsTable.organizationId, organizationId),
         eq(documentsTable.isDeleted, false),
-        ...(filters?.tags ? filters.tags.map(tag => eq(documentsTagsTable.tagId, tag)) : []),
+        ...(filters?.tags ? [inArray(documentsTagsTable.tagId, filters.tags)] : []),
       ),
     );
 
@@ -224,13 +246,15 @@ async function getDocumentById({ documentId, organizationId, db }: { documentId:
     return { document: undefined };
   }
 
-  const tags = await db
+  const rawTags = await db
     .select({
       ...getTableColumns(tagsTable),
     })
     .from(documentsTagsTable)
     .leftJoin(tagsTable, eq(tagsTable.id, documentsTagsTable.tagId))
     .where(eq(documentsTagsTable.documentId, documentId));
+
+  const tags = rawTags.filter(tag => !isNil(tag.id));
 
   return {
     document: {
