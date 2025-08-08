@@ -90,7 +90,7 @@ function setupGetOrganizationRoute({ app, db }: RouteDefinitionContext) {
 }
 
 function setupUpdateOrganizationRoute({ app, db }: RouteDefinitionContext) {
-  app.put(
+  app.patch(
     '/api/organizations/:organizationId',
     requireAuthentication(),
     validateJsonBody(z.object({

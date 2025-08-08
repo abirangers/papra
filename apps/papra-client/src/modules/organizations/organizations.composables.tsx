@@ -27,8 +27,16 @@ export function useCreateOrganization() {
 
 export function useUpdateOrganization() {
   return {
-    updateOrganization: async ({ organizationId, organizationName }: { organizationId: string; organizationName: string }) => {
-      await updateOrganization({ organizationId, name: organizationName });
+    updateOrganization: async ({
+      organizationId,
+      name,
+      aiTaggingEnabled,
+    }: {
+      organizationId: string;
+      name?: string;
+      aiTaggingEnabled?: boolean;
+    }) => {
+      await updateOrganization({ organizationId, name, aiTaggingEnabled });
 
       await queryClient.invalidateQueries({
         queryKey: ['organizations'],
@@ -37,7 +45,6 @@ export function useUpdateOrganization() {
     },
   };
 }
-
 export function useDeleteOrganization() {
   const navigate = useNavigate();
 

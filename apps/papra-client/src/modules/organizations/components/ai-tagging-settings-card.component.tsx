@@ -31,7 +31,7 @@ export const AiTaggingSettingsCard: Component<{ organization: Organization }> = 
         <p class="font-medium">{t('organization.settings.ai-tagging.enable-label')}</p>
         <Switch
           checked={props.organization.aiTaggingEnabled}
-          onCheckedChange={handleToggle}
+          onChange={handleToggle}
         >
           <SwitchControl>
             <SwitchThumb />
