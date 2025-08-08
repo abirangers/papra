@@ -1,6 +1,7 @@
 import type { Logger } from '@crowlog/logger';
 import type { Config } from '../config/config.types';
-import { extractTextFromFile } from '@papra/lecture';
+import { extractText } from '@papra/lecture';
+import mime from 'mime-types';
 
 import { createLogger } from '../shared/logger/logger';
 
@@ -27,8 +28,15 @@ export async function extractDocumentText({
   logger?: Logger;
   config: Config;
 }) {
-  const { textContent, error, extractorName } = await extractTextFromFile({
-    file,
+  const arrayBuffer = await file.arrayBuffer();
+  const lookedUp = mime.lookup(file.name);
+  const safeMimeType = file.type && file.type !== 'application/octet-stream'
+    ? file.type
+    : (lookedUp === false ? 'application/octet-stream' : lookedUp);
+
+  const { textContent, error, extractorName } = await extractText({
+    arrayBuffer,
+    mimeType: safeMimeType,
     config: { tesseract: { languages: ocrLanguages }, gemini: { apiKey: config.gemini.apiKey } },
   });
 

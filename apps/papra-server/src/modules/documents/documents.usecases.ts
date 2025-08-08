@@ -7,6 +7,7 @@ import type { TaggingRulesRepository } from '../tagging-rules/tagging-rules.repo
 import type { TagsRepository } from '../tags/tags.repository';
 import type { TaskServices } from '../tasks/tasks.services';
 import type { TrackingServices } from '../tracking/tracking.services';
+import type { OrganizationsRepository } from '../organizations/organizations.repository';
 import type { WebhookRepository } from '../webhooks/webhook.repository';
 import type { DocumentActivityRepository } from './document-activity/document-activity.repository';
 import type { DocumentsRepository } from './documents.repository';
@@ -46,7 +47,7 @@ export async function createDocument({
   plansRepository,
   subscriptionsRepository,
   trackingServices,
-  taggingRulesRepository,
+  // taggingRulesRepository,
   tagsRepository,
   webhookRepository,
   documentActivityRepository,
@@ -436,9 +437,33 @@ export async function extractAndSaveDocumentFileContent({
   const { file } = await collectStreamToFile({ fileStream, fileName: document.name, mimeType: document.mimeType });
   const { text } = await extractDocumentText({ file, ocrLanguages, config });
 
-  const { document: updatedDocument } = await documentsRepository.updateDocument({ documentId, organizationId, content: text });
+  const { document: updatedDocument } = await documentsRepository.updateDocument({ documentId, organizationId, content: text ?? '' });
 
   if (updatedDocument) {
+    // Auto-tag Markdown documents with a default "markdown" tag
+    const mime = updatedDocument.mimeType ?? '';
+    const isMarkdownByMime = mime === 'text/markdown' || mime === 'application/markdown';
+    const isMarkdownByName = (updatedDocument.name ?? '').toLowerCase().endsWith('.md');
+    if (isMarkdownByMime || isMarkdownByName) {
+      const { tags: existingOrgTags } = await tagsRepository.getOrganizationTags({ organizationId });
+      const lowercasedExistingTags = new Map(existingOrgTags.map(t => [t.name.toLowerCase(), t]));
+
+      let markdownTagId = lowercasedExistingTags.get('markdown')?.id;
+      if (!markdownTagId) {
+        const created = await tagsRepository.createTag({
+          tag: {
+            name: 'markdown',
+            color: `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`,
+            organizationId,
+          },
+        });
+        // tagsRepository.createTag always returns a created tag or throws
+        markdownTagId = created.tag!.id;
+      }
+
+      await tagsRepository.addTagToDocument({ tagId: markdownTagId, documentId: updatedDocument.id });
+    }
+
     await applyTaggingRules({ document: updatedDocument, taggingRulesRepository, tagsRepository, config, organizationsRepository });
   }
 }

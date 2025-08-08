@@ -3,7 +3,7 @@ import { GoogleGenAI } from '@google/genai';
 import { defineTextExtractor } from '../extractors.models';
 
 export const imageExtractorDefinition = defineTextExtractor({
-  name: 'gemini', // Changed name to reflect the new engine
+  name: 'gemini',
   mimeTypes: [
     'image/png',
     'image/jpeg',
@@ -18,19 +18,7 @@ export const imageExtractorDefinition = defineTextExtractor({
     }
 
     const genAI = new GoogleGenAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
-    const prompt = `You are a highly specialized text extraction engine. Your sole purpose is to extract raw, unformatted text from the provided document content.
-                    **Instructions:**
-                    1.  Analyze the document content below.
-                    2.  Extract ALL text content exactly as it appears.
-                    3.  Preserve original line breaks, spacing, and paragraphs.
-                    4.  Your output must be ONLY the raw text content. Do not add any titles, summaries, explanations, or any other text before or after the extracted content.
-
-                    **Content to Process:**
-                    \`\`\`
-                    ${documentContent}
-                    \`\`\``;
     const buffer = arrayBuffer instanceof ArrayBuffer ? Buffer.from(arrayBuffer) : arrayBuffer;
 
     const imagePart = {
@@ -38,12 +26,26 @@ export const imageExtractorDefinition = defineTextExtractor({
         data: buffer.toString('base64'),
         mimeType,
       },
-    };
+    } as const;
 
-    const result = await model.generateContent([prompt, imagePart]);
-    const response = await result.response;
-    const content = response.text();
+    const instructionPart = {
+      text: [
+        'You are a highly specialized text extraction engine. Extract ALL textual content from the image.',
+        'Preserve line breaks and spacing. Output ONLY the raw extracted text with no extra words.',
+      ].join('\n'),
+    } as const;
 
+    const response = await genAI.models.generateContent({
+      model: 'gemini-2.0-flash',
+      contents: [
+        {
+          role: 'user',
+          parts: [imagePart, instructionPart],
+        },
+      ],
+    });
+
+    const content = response.text.trim();
     return { content };
   },
 });
